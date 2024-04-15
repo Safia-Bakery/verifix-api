@@ -165,8 +165,8 @@ def get_verifix_timesheets(fromdate,todate,cursor:1):
 
 
 
-def excell_generate(data):
-    data_frame = {'id':[],'department':[],"limit":[],"workers":[],'status':[]}
+def excell_generate(data,divisions_dict):
+    data_frame = {'id':[],'department':[],"limit":[],"workers":[]}
     for i in data:
         data_frame['id'].append(i.id)
         data_frame['department'].append(i.name)
@@ -174,8 +174,7 @@ def excell_generate(data):
             data_frame['limit'].append(' ')
         else:
             data_frame['limit'].append(i.limit)
-        data_frame['workers'].append(6)
-        data_frame['status'].append(i.status)
+        data_frame['workers'].append(divisions_dict[str(i.id)])
     df = pd.DataFrame(data_frame)
     df.to_excel('files/output.xlsx',index=False)
     return 'output.xlsx'

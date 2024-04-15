@@ -100,7 +100,23 @@ async def get_divisions_excell(
     current_user: user_sch.User = Depends(get_current_user)
 ):
     division_list = crud.get_divisions(db=db)
-    file_name = excell_generate(division_list)
+    division_dict = {}
+
+    division_list = crud.get_divisions(db=db)
+    for i in division_list:
+        division_dict[str(i.id)] = 0
+    cursor = 1
+
+    while True:
+        worker_list = get_verifix_workers(cursor=cursor)
+        for i in worker_list['data']:
+            staff= crud.get_staff(db=db,staff_id=i['staff_id'])
+            division_dict[str(staff.division_id)] += 1
+        if len(worker_list['data'])>0:
+            cursor = worker_list['meta']['next_cursor']
+        else:
+            break
+    file_name = excell_generate(division_list,division_dict)
 
     return {"file_name":file_name}
 
@@ -129,7 +145,7 @@ async def update_divisions_excell(
             else:
                 limit = int((i['limit']))
 
-            crud.update_division(db, schema.DivisionUpdate(id=i['id'],limit=limit,name=i['department'],status=i['status']))
+            crud.update_division(db, schema.DivisionUpdate(id=i['id'],limit=limit,name=i['department'],status=None))
     except Exception as e:
         return {"message":str(e)}
     return {"message":"Timesheets updated successfully",'success':True}
