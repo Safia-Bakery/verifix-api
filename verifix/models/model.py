@@ -35,3 +35,17 @@ class Divisions(Base):
     state = Column(String,default=0)
     limit = Column(Integer,nullable=True)
     created_at = Column(DateTime,server_default=func.now())
+    status = Column(Integer,default=1)
+    division_workers=relationship("DivisionWorkers",back_populates="division")
+
+
+class DivisionWorkers(Base):
+    __tablename__="division_workers"
+    id=Column(BIGINT,primary_key=True,index=True)
+    division_id=Column(BIGINT,ForeignKey("divisions.id"))
+    phone_number=Column(String,nullable=True)
+    name=Column(String,nullable=True)
+    employee_id=Column(BIGINT,nullable=True)
+    created_at=Column(DateTime,server_default=func.now())
+    status=Column(Integer,default=1)
+    division=relationship("Divisions",back_populates="division_workers")

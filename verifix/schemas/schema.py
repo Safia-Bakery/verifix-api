@@ -9,6 +9,7 @@ class DivisionUpdate(BaseModel):
     id:int
     limit: Optional[int]=None
     name: Optional[str]=None
+    status:Optional[int]=None
 
 
 class Division(BaseModel):

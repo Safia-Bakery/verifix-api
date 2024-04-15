@@ -148,15 +148,15 @@ def get_virifix_divisions():
     return response.json()
 
 
-def get_verifix_timesheets(division_id,fromdate,todate):
+def get_verifix_timesheets(fromdate,todate,cursor:1):
     url = f"{VERIFIX_URL}/b/vhr/api/v1/core/timesheet$export"
     body = {
-        "division_ids": [division_id],
+        "division_ids": [],
         "period_begin_date": fromdate,
         "period_end_dat": todate
     }
 
-    response = requests.get(url, auth=(VERIFIX_USERNAME, VERIFIX_PASSWORD),json=body)
+    response = requests.get(url, auth=(VERIFIX_USERNAME, VERIFIX_PASSWORD),json=body,headers={'cursor':str(cursor)})
     try:
         return response.json()
     except:
@@ -166,7 +166,7 @@ def get_verifix_timesheets(division_id,fromdate,todate):
 
 
 def excell_generate(data):
-    data_frame = {'id':[],'department':[],"limit":[],"workers":[]}
+    data_frame = {'id':[],'department':[],"limit":[],"workers":[],'status':[]}
     for i in data:
         data_frame['id'].append(i.id)
         data_frame['department'].append(i.name)
@@ -175,10 +175,17 @@ def excell_generate(data):
         else:
             data_frame['limit'].append(i.limit)
         data_frame['workers'].append(6)
+        data_frame['status'].append(i.status)
     df = pd.DataFrame(data_frame)
     df.to_excel('files/output.xlsx',index=False)
     return 'output.xlsx'
 
+
+def get_verifix_workers(cursor:1):
+    url = f"{VERIFIX_URL}/b/vhr/api/v1/pro/employee$list"
+
+    response = requests.get(url, auth=(VERIFIX_USERNAME, VERIFIX_PASSWORD),headers={'cursor':str(cursor)})
+    return response.json()
 
 
 
