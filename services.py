@@ -190,7 +190,7 @@ def get_verifix_workers(cursor:1):
 def get_verifix_staff(staff_id):    
     url = f"{VERIFIX_URL}/b/vhr/api/v1/pro/employee$get"
     body = {
-        {"staff_ids":[staff_id]}
+        "staff_ids":[staff_id]
     }
     response = requests.get(url, auth=(VERIFIX_USERNAME, VERIFIX_PASSWORD),json=body)
     return response.json()
