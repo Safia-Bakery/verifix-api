@@ -76,7 +76,7 @@ async def get_divisions(
             staff= crud.get_staff(db=db,staff_id=i['staff_id'])
             if not staff:
                 staff_data = get_verifix_staff(i['staff_id'])
-                crud.create_staff(db=db,id=i['staff_id'],division_id=staff_data['data'][0]['org_unit_id'],phone_number=staff_data['data'][0]['main_phone'],name=staff_data['data'][0]['employee_name'],employee_id=staff_data['data'][0]['employee_id'])
+                staff = crud.create_staff(db=db,id=i['staff_id'],division_id=staff_data['data'][0]['org_unit_id'],phone_number=staff_data['data'][0]['main_phone'],name=staff_data['data'][0]['employee_name'],employee_id=staff_data['data'][0]['employee_id'])
             division_dict[str(staff.division_id)] += 1
         if len(worker_list['data'])>0:
             cursor = worker_list['meta']['next_cursor']
@@ -117,7 +117,7 @@ async def get_divisions_excell(
             staff= crud.get_staff(db=db,staff_id=i['staff_id'])
             if not staff:
                 staff_data = get_verifix_staff(i['staff_id'])
-                crud.create_staff(db=db,id=i['staff_id'],division_id=staff_data['data'][0]['org_unit_id'],phone_number=staff_data['data'][0]['main_phone'],name=staff_data['data'][0]['employee_name'],employee_id=staff_data['data'][0]['employee_id'])
+                staff = crud.create_staff(db=db,id=i['staff_id'],division_id=staff_data['data'][0]['org_unit_id'],phone_number=staff_data['data'][0]['main_phone'],name=staff_data['data'][0]['employee_name'],employee_id=staff_data['data'][0]['employee_id'])
 
             division_dict[str(staff.division_id)] += 1
         if len(worker_list['data'])>0:
