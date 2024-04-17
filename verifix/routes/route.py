@@ -20,7 +20,8 @@ from services import (
     get_virifix_divisions,
     get_verifix_timesheets,
     excell_generate,
-    get_verifix_workers
+    get_verifix_workers,
+    get_verifix_staff
 
 )
 
@@ -111,6 +112,9 @@ async def get_divisions_excell(
         worker_list = get_verifix_workers(cursor=cursor)
         for i in worker_list['data']:
             staff= crud.get_staff(db=db,staff_id=i['staff_id'])
+            if not staff:
+                staff_data = get_verifix_staff(i['staff_id'])
+                crud.create_staff(db=db,id=i['staff_id'],division_id=staff_data['data']['fte_id'],phone_number=staff_data['data']['main_phone'],name=staff_data['data']['employee_name'],employee_id=staff_data['data']['employee_id'])
             division_dict[str(staff.division_id)] += 1
         if len(worker_list['data'])>0:
             cursor = worker_list['meta']['next_cursor']
@@ -163,7 +167,7 @@ async def create_staff(
         else:
             break
         for i in worker_list['data']:
-            crud.create_staff(db=db,id=i['staff_id'],division_id=i['division_id'],phone_number=i['main_phone'],name=i['employee_name'],employee_id=i['employee_id'])
+            crud.create_staff(db=db,id=i['staff_id'],division_id=i['fte_id'],phone_number=i['main_phone'],name=i['employee_name'],employee_id=i['employee_id'])
 
         
     return {"message":"Staff created successfully",'success':True}
