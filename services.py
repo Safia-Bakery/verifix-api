@@ -188,7 +188,7 @@ def get_verifix_workers(cursor:1):
 
 
 def get_verifix_staff(staff_id):    
-    url = f"{VERIFIX_URL}/b/vhr/api/v1/pro/employee$get"
+    url = f"{VERIFIX_URL}/b/vhr/api/v1/pro/employee$list"
     body = {
         "staff_ids":[staff_id]
     }
