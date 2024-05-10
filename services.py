@@ -141,26 +141,45 @@ def generate_random_filename(length=30):
     return random_filename
 
 
-def get_virifix_divisions():
+def get_virifix_divisions(cursor):
     url = f"{VERIFIX_URL}/b/vhr/api/v1/core/division$list"
 
-    response = requests.get(url, auth=(VERIFIX_USERNAME, VERIFIX_PASSWORD))
+    response = requests.get(url, auth=(VERIFIX_USERNAME, VERIFIX_PASSWORD),headers={'cursor':str(cursor)})
     return response.json()
 
 
-def get_verifix_timesheets(fromdate,todate,cursor:1):
+
+def get_verifix_schedules(cursor):
+    url = f"{VERIFIX_URL}/b/vhr/api/v1/core/schedule$list"
+
+    response = requests.get(url, auth=(VERIFIX_USERNAME, VERIFIX_PASSWORD),headers={'cursor':str(cursor)})
+    return response.json()
+
+     
+
+def get_verifix_timesheets(fromdate, todate, cursor):
     url = f"{VERIFIX_URL}/b/vhr/api/v1/core/timesheet$export"
     body = {
-        "division_ids": [],
         "period_begin_date": fromdate,
-        "period_end_dat": todate
+        "period_end_date": todate,
+        "division_ids": [],
+        "employee_ids": []
+    }
+    headers = {
+        'Content-Type': 'application/json',  # Ensure the content type is set to application/json
+        'cursor': str(cursor)  # Cursor can be part of the headers if that's expected by the API
     }
 
-    response = requests.get(url, auth=(VERIFIX_USERNAME, VERIFIX_PASSWORD),json=body,headers={'cursor':str(cursor)})
+    # Switch to using POST if the API is expected to receive JSON data in the body
+    response = requests.post(url, auth=(VERIFIX_USERNAME, VERIFIX_PASSWORD), json=body, headers=headers)
+
     try:
         return response.json()
-    except:
+    except ValueError:  # More specific exception handling
         return False
+    
+
+
     
 
 
@@ -194,6 +213,10 @@ def get_verifix_staff(staff_id):
     }
     response = requests.get(url, auth=(VERIFIX_USERNAME, VERIFIX_PASSWORD),json=body)
     return response.json()
+
+
+
+
 
 
 

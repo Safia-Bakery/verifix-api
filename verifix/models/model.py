@@ -39,6 +39,7 @@ class Divisions(Base):
     division_workers=relationship("DivisionWorkers",back_populates="division")
 
 
+
 class DivisionWorkers(Base):
     __tablename__="division_workers"
     id=Column(BIGINT,primary_key=True,index=True)
@@ -48,4 +49,34 @@ class DivisionWorkers(Base):
     employee_id=Column(BIGINT,nullable=True)
     created_at=Column(DateTime,server_default=func.now())
     status=Column(Integer,default=1)
+    schedule_id = Column(BIGINT,ForeignKey("schedules.id"))
+    schedule=relationship("Schedules",back_populates="employee")
     division=relationship("Divisions",back_populates="division_workers")
+    timesheet=relationship("Timesheets",back_populates="employee")
+
+
+
+class Schedules(Base):
+    __tablename__="schedules"
+    id=Column(BIGINT,primary_key=True,index=True)
+    name = Column(String,nullable=True)
+    code = Column(String,nullable=True)
+    created_at=Column(DateTime,server_default=func.now())
+    state=Column(String,nullable=True)
+    employee = relationship("DivisionWorkers",back_populates="schedule")
+    status = Column(Integer,default=1)
+
+
+
+class Timesheets(Base):
+    __tablename__="timesheets"
+    id=Column(BIGINT,primary_key=True,index=True)
+    employee_id=Column(BIGINT,ForeignKey('division_workers.id'))
+    employee = relationship("DivisionWorkers",back_populates="timesheet")
+    input_time=Column(DateTime,nullable=True)
+    output_time=Column(DateTime,nullable=True)
+    created_at=Column(DateTime,server_default=func.now())
+    status=Column(Integer,default=1)
+
+
+
