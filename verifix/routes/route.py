@@ -150,8 +150,8 @@ async def get_divisions(
         #     division_count.append({'id':i.id,"division":i.name,"workers":0,'limit':i.limit})
         #division_count.append({'id':i.id,"division":i.name,"workers":6,'limit':i.limit})
     for i in division_list:
-        division_count.append({'id':i.id,"division":i.name,"workers":division_dict[str(i.id)],'schedules':schedule_data,'limit':i.limit})
-    return {"data":division_count}
+        division_count.append({'id':i.id,"division":i.name,"workers":division_dict[str(i.id)],'limit':i.limit})
+    return {"data":division_count,'schedules':schedule_data}
 
 
 
