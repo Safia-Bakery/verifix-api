@@ -113,8 +113,8 @@ async def get_divisions(
                 else:
                     division_dict[str(i.id)] = {str(schedule.id):0}
 
-        division_dict[str(i.id)]['total'] = 0
-        division_dict[str(i.id)]['total_workers'] = 0
+        division_dict[str(i.id)]['came_workers'] = 0
+        division_dict[str(i.id)]['division_workers'] = 0
 
 
 
