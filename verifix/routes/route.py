@@ -112,7 +112,11 @@ async def get_divisions(
                     division_dict[str(i.id)][str(schedule.id)] = 0
                 else:
                     division_dict[str(i.id)] = {str(schedule.id):0}
-                    
+
+        division_dict[str(i.id)]['total'] = 0
+        division_dict[str(i.id)]['total_workers'] = 0
+
+
 
     cursor = 1
 
@@ -129,6 +133,10 @@ async def get_divisions(
                         staff_data = crud.create_staff(db=db,id=i['staff_id'],schedule_id=i['division_id'],division_id=staff_data['data'][0]['org_unit_id'],phone_number=staff_data['data'][0]['main_phone'],name=staff_data['data'][0]['employee_name'],employee_id=staff_data['data'][0]['employee_id'])
                     if staff_data.schedule_id in required_schedules:
                         division_dict[str(staff_data.division_id)][str(staff_data.schedule_id)] += 1
+                    division_dict[str(staff_data.division_id)]['came_workers'] += 1
+                division_dict[str(staff_data.division_id)]['division_workers'] += 1
+
+
             except :
                 pass
             # if input_time_value is not None and output_time_value is not None:
