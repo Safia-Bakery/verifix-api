@@ -37,6 +37,7 @@ def user_create(db: Session, user: user_sch.UserCreate):
     db.add(db_user)
     db.commit()
     db.refresh(db_user)
+
     return db_user
 
 def user_update(db:Session,id:int,status:Optional[int]=None,password:Optional[str]=None,phone_number:Optional[str]=None,name:Optional[str]=None):

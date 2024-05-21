@@ -215,8 +215,16 @@ def get_verifix_staff(staff_id):
     return response.json()
 
 
+def sort_list_with_keys_at_end(data, keys_list):
+    # Separate the keys that need to be moved to the end
+    keys_to_move = [item for item in data if item.name in keys_list]
+    other_items = [item for item in data if item.name not in keys_list]
 
+    # Sort the other items
 
+    # Concatenate the sorted items with the keys to move
+    final_sorted_list = other_items + keys_to_move
 
+    return final_sorted_list
 
 

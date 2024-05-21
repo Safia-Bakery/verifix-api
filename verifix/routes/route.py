@@ -23,7 +23,8 @@ from services import (
     excell_generate,
     get_verifix_workers,
     get_verifix_staff,
-    get_verifix_schedules
+    get_verifix_schedules,
+    sort_list_with_keys_at_end
 
 )
 import pytz
@@ -95,6 +96,8 @@ async def get_divisions(
     db: Session = Depends(get_db),
     current_user: user_sch.User = Depends(get_current_user)
 ):
+    expected_workers = 0
+    came_workers = 0
     division_count = []
     division_dict = {}
     required_schedules = [505,21,44,45,41,54]
@@ -126,7 +129,9 @@ async def get_divisions(
         for i in timesheets['data']:
             try:
                 input_time_value = i['days'][0]['input_time']
+                expected_workers += 1
                 if input_time_value:
+                    came_workers += 1
                     staff_data = crud.get_staff(db=db,staff_id=i['staff_id'])
                     if not staff_data:
                         staff_data = get_verifix_staff(i['staff_id'])
@@ -139,27 +144,20 @@ async def get_divisions(
 
             except :
                 pass
-            # if input_time_value is not None and output_time_value is not None:
-            #     if input_time.time() < current_time.time():
-            #         if output_time.time() > current_time.time():
-            #             division_dict[str(i['division_id'])] += 1
-            # elif output_time_value is None and input_time_value is not None:
-            #     division_dict[str(i['division_id'])] += 1
-        
-            #crud.get_or_create_timesheet(db=db,employee_id=staff.id,from_date=selected_date, input_time=input_time ,output_time=output_time)
         if len(timesheets['data'])>0:
             cursor = timesheets['meta']['next_cursor']
         else:
             break
-        # data = get_verifix_timesheets(i.id,from_date,to_date)
-        # if data:
-        #     division_count.append({'id':i.id,"division":i.name,"workers":len(data['data']),'limit':i.limit})
-        # else:
-        #     division_count.append({'id':i.id,"division":i.name,"workers":0,'limit':i.limit})
-        #division_count.append({'id':i.id,"division":i.name,"workers":6,'limit':i.limit})
+    division_list = sort_list_with_keys_at_end(data=division_list,keys_list=['9431 Бургер цех',
+                                                             '5111 Техн. разработки',
+                                                             '0002 Автоматизация оборудования',
+                                                             '0111 Склад СиМ',
+                                                             '5411 Дегустационная',
+                                                             '5211 Кабинет ЗамНач'
+                                                             ])
     for i in division_list:
         division_count.append({'id':i.id,"division":i.name,"workers":division_dict[str(i.id)],'limit':i.limit})
-    return {"data":division_count,'schedules':schedule_data}
+    return {"data":division_count,'schedules':schedule_data,'expected_workers':expected_workers,'came_workers':came_workers}
 
 
 

@@ -78,8 +78,13 @@ async def refresh(
 async def register(
     form_data: user_sch.UserCreate,
     db: Session = Depends(get_db)):
-    user = query.user_create(db=db, user=form_data)
-
+    try:
+        user = query.user_create(db=db, user=form_data)
+    except:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Already have an account",
+        )
     return user
 
 @user_router.get("/me", response_model=user_sch.User, summary="Get current user",tags=["User"])
