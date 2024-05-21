@@ -196,7 +196,7 @@ def excell_generate(data,divisions_dict):
         data_frame['Штатка'].append(divisions_dict[str(i.id)])
     df = pd.DataFrame(data_frame)
     df.to_excel('files/output.xlsx',index=False)
-    return 'files/output.xlsx'
+    return 'output.xlsx'
 
 
 def get_verifix_workers(cursor:1):
