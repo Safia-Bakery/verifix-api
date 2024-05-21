@@ -185,18 +185,18 @@ def get_verifix_timesheets(fromdate, todate, cursor):
 
 
 def excell_generate(data,divisions_dict):
-    data_frame = {'id':[],'department':[],"limit":[],"workers":[]}
+    data_frame = {'№':[],'Отдел':[],"Норма Выхода":[],"Штатка":[]}
     for i in data:
-        data_frame['id'].append(i.id)
-        data_frame['department'].append(i.name)
+        data_frame['№'].append(i.id)
+        data_frame['Отдел'].append(i.name)
         if i.name == None:  
-            data_frame['limit'].append(' ')
+            data_frame['Норма Выхода'].append(' ')
         else:
-            data_frame['limit'].append(i.limit)
-        data_frame['workers'].append(divisions_dict[str(i.id)])
+            data_frame['Норма Выхода'].append(i.limit)
+        data_frame['Штатка'].append(divisions_dict[str(i.id)])
     df = pd.DataFrame(data_frame)
     df.to_excel('files/output.xlsx',index=False)
-    return 'output.xlsx'
+    return 'files/output.xlsx'
 
 
 def get_verifix_workers(cursor:1):

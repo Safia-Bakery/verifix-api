@@ -166,7 +166,6 @@ async def get_divisions(
 @verifix_router.get("/divisions/excell", summary="Get timesheets",tags=["Timesheet"])
 async def get_divisions_excell(
     from_date: Optional[str] = None,
-    to_date: Optional[str] = None,
     db: Session = Depends(get_db),
     current_user: user_sch.User = Depends(get_current_user)
 ):
@@ -185,12 +184,19 @@ async def get_divisions_excell(
             if not staff:
                 staff_data = get_verifix_staff(i['staff_id'])
                 staff = crud.create_staff(db=db,id=i['staff_id'],division_id=staff_data['data'][0]['org_unit_id'],phone_number=staff_data['data'][0]['main_phone'],name=staff_data['data'][0]['employee_name'],employee_id=staff_data['data'][0]['employee_id'])
-
             division_dict[str(staff.division_id)] += 1
         if len(worker_list['data'])>0:
             cursor = worker_list['meta']['next_cursor']
         else:
             break
+
+    division_list = sort_list_with_keys_at_end(data=division_list, keys_list=['9431 Бургер цех',
+                                                                              '5111 Техн. разработки',
+                                                                              '0002 Автоматизация оборудования',
+                                                                              '0111 Склад СиМ',
+                                                                              '5411 Дегустационная',
+                                                                              '5211 Кабинет ЗамНач'
+                                                                              ])
     file_name = excell_generate(division_list,division_dict)
 
     return {"file_name":file_name}
@@ -215,12 +221,12 @@ async def update_divisions_excell(
         data = pd.read_excel(file_path)
 
         for index,i in data.iterrows():
-            if pd.isnull(i['limit']):
+            if pd.isnull(i['Норма Выхода']):
                 limit = None
             else:
-                limit = int((i['limit']))
+                limit = int((i['Норма Выхода']))
 
-            crud.update_division(db, schema.DivisionUpdate(id=i['id'],limit=limit,name=i['department'],status=None))
+            crud.update_division(db, schema.DivisionUpdate(id=i['№'],limit=limit,name=i['Отдел'],status=None))
     except Exception as e:
         return {"message":str(e)}
     return {"message":"Timesheets updated successfully",'success':True}
