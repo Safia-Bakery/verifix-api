@@ -32,6 +32,7 @@ def get_divisions(db: Session,name:Optional[str]=None,id:Optional[int]=None):
         query = query.filter(Divisions.name.ilike(f"%{name}%"))
     if id is not None:
         query = query.filter(Divisions.id == id)
+    query = query.filter(Divisions.status == 1)
     
     return query.all()
 
