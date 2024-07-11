@@ -13,3 +13,4 @@ requests
 alembic
 python-telegram-bot
 pandas
+apscheduler

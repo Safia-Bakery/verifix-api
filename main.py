@@ -1,10 +1,6 @@
-from jose import JWTError, jwt
-from datetime import datetime, timedelta
 from fastapi.middleware.cors import CORSMiddleware
-from sqlalchemy.orm import Session
 from fastapi.responses import HTMLResponse
-from fastapi import Depends, FastAPI, HTTPException,UploadFile,File,Form,Header,Request,status
-from typing import Optional
+from fastapi import Depends, FastAPI
 
 from fastapi_pagination import paginate,Page,add_pagination
 from fastapi.staticfiles import StaticFiles
