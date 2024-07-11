@@ -3,6 +3,7 @@ from sqlalchemy.orm import Session
 from fastapi import Depends, HTTPException, status,UploadFile,File
 from typing import Optional,Annotated
 from users.schemas import user_sch
+from collections import OrderedDict
 import pandas as pd
 from datetime import datetime,date
 from services import (
@@ -105,7 +106,6 @@ async def create_division(
         for i in schedules['data']:
             crud.create_schedule(db=db,id=i['schedule_id'],name=i['name'],code=i['code'],state=i['state'])
         if len(schedules['data'])>0 :
-
             cursor = schedules['meta']['next_cursor']
         else:
             break
@@ -131,11 +131,10 @@ async def get_divisions(
     db: Session = Depends(get_db),
     current_user: user_sch.User = Depends(get_current_user)
 ):
-    placing_last = {}
     expected_workers = 0
     came_workers = 0
     required_divisions = [23,102,26,44,104,103]
-    division_dict = {}
+    ready_data = []
     required_schedules = [505,21,44,45,41,54]
     schedule_list = crud.get_schedules(db=db)
     schedule_data = {}
@@ -144,31 +143,34 @@ async def get_divisions(
 
 
 
-
     for schedule in schedule_list:
 
         if schedule.id in required_schedules:
+
             schedule_data[str(schedule.id)] = {}
+            schedule_data[str(schedule.id)]['divisions'] = {}
             schedule_data[str(schedule.id)]['name'] = schedule.name
             schedule_data[str(schedule.id)]['id'] = schedule.id
             for division in division_list:
                 required_divisins.append(division.id)
-                if division.id not in required_divisions:
-                    schedule_data[str(schedule.id)][str(division.id)] = {}
-                    schedule_data[str(schedule.id)][str(division.id)]['came_workers'] = 0
-                    schedule_data[str(schedule.id)][str(division.id)]['division_workers'] = 0
-                    schedule_data[str(schedule.id)][str(division.id)]['name'] = division.name
-                    schedule_data[str(schedule.id)][str(division.id)]['id'] = division.id
-                    schedule_data[str(schedule.id)][str(division.id)]['limit'] = division.limit
-                else:
-                    placing_last[str(division.id)] = {}
-                    placing_last[str(division.id)]['came_workers'] = 0
-                    placing_last[str(division.id)]['division_workers'] = 0
-                    placing_last[str(division.id)]['name'] = division.name
-                    placing_last[str(division.id)]['id'] = division.id
-                    placing_last[str(division.id)]['limit'] = division.limit
-            schedule_data[str(schedule.id)].update(placing_last)
-
+                # if division.id not in required_divisions:
+                schedule_data[str(schedule.id)]['divisions'][str(division.id)] = {}
+                schedule_data[str(schedule.id)]['divisions'][str(division.id)]['came_workers'] = 0
+                schedule_data[str(schedule.id)]['divisions'][str(division.id)]['division_workers'] = 0
+                schedule_data[str(schedule.id)]['divisions'][str(division.id)]['name'] = division.name
+                schedule_data[str(schedule.id)]['divisions'][str(division.id)]['id'] = division.id
+                schedule_data[str(schedule.id)]['divisions'][str(division.id)]['limit'] = division.limit
+            #     else:
+            #         placing_last[str(division.id)] = {}
+            #         placing_last[str(division.id)]['came_workers'] = 0
+            #         placing_last[str(division.id)]['division_workers'] = 0
+            #         placing_last[str(division.id)]['name'] = division.name
+            #         placing_last[str(division.id)]['id'] = division.id
+            #         placing_last[str(division.id)]['limit'] = division.limit
+            # schedule_data[str(schedule.id)] = OrderedDict(schedule_data[str(schedule.id)])
+            # schedule_data[str(schedule.id)].update(placing_last)
+            # for required_division in required_divisions:
+            #     schedule_data[str(schedule.id)][str(required_division)] = schedule_data[str(schedule.id)].pop(str(required_division))
             placing_last = {}
     cursor = 1
 
@@ -187,14 +189,14 @@ async def get_divisions(
                     if staff_data:
                         if staff_data.division_id in required_divisins:
                             if staff_data.schedule_id in required_schedules:
-                                schedule_data[str(staff_data.schedule_id)][str(staff_data.division_id)]['came_workers'] += 1
-                                schedule_data[str(staff_data.schedule_id)][str(staff_data.division_id)]['division_workers'] += 1
+                                schedule_data[str(staff_data.schedule_id)]['divisions'][str(staff_data.division_id)]['came_workers'] += 1
+                                schedule_data[str(staff_data.schedule_id)]['divisions'][str(staff_data.division_id)]['division_workers'] += 1
                 else:
                     staff_data = crud.get_staff(db=db, staff_id=i['staff_id'])
                     if staff_data:
                         if staff_data.division_id in required_divisins:
                             if staff_data.schedule_id in required_schedules:
-                                schedule_data[str(staff_data.schedule_id)][str(staff_data.division_id)]['division_workers'] += 1
+                                schedule_data[str(staff_data.schedule_id)]['divisions'][str(staff_data.division_id)]['division_workers'] += 1
             except:
                 pass
         if len(timesheets['data']) > 0:
@@ -202,7 +204,17 @@ async def get_divisions(
         else:
             break
 
-    return {"timesheets":schedule_data, 'expected_workers': expected_workers, 'came_workers': came_workers}
+
+    for key,value in schedule_data.items():
+        schedule_data[str(key)]['divisions'] = list(value['divisions'].values())
+
+    for key,value in schedule_data.items():
+        ready_data.append(value)
+
+
+
+
+    return {"timesheets":ready_data, 'expected_workers': expected_workers, 'came_workers': came_workers}
 
 
 
