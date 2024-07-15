@@ -237,12 +237,14 @@ async def get_divisions(
 
 
 
-@verifix_router.get("/v2/divisions/excell", summary="Get divisions",tags=["Division"])
+@verifix_router.post("/v2/divisions/excell", summary="Get divisions",tags=["Division"])
 async def get_divisions_excell_v2(
     from_date:date,
+    schdules: Optional[list[int]] = None,
     db: Session = Depends(get_db),
     current_user: user_sch.User = Depends(get_current_user)
 ):
+
 
     expected_workers = 0
     came_workers = 0
@@ -254,6 +256,9 @@ async def get_divisions_excell_v2(
     schedule_data = {}
     required_divisins = []
     division_list = crud.get_divisions(db=db)
+    if schdules is not None:
+        required_schedules = schdules
+
 
 
 
