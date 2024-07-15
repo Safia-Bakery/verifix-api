@@ -174,7 +174,11 @@ def get_verifix_timesheets(fromdate, todate, cursor):
     response = requests.post(url, auth=(VERIFIX_USERNAME, VERIFIX_PASSWORD), json=body, headers=headers)
 
     try:
-        return response.json()
+        response = response.json()
+        if int(response['meta']['next_cursor'])>0:
+            return response
+        else:
+            return False
     except ValueError:  # More specific exception handling
         return False
     

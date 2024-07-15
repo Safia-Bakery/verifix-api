@@ -137,6 +137,7 @@ async def get_divisions(
     ready_data = []
     required_schedules = [505,21,44,45,41,54]
     schedule_list = crud.get_schedules(db=db)
+    placing_last = {}
     schedule_data = {}
     required_divisins = []
     division_list = crud.get_divisions(db=db)
@@ -151,32 +152,46 @@ async def get_divisions(
             schedule_data[str(schedule.id)]['divisions'] = {}
             schedule_data[str(schedule.id)]['name'] = schedule.name
             schedule_data[str(schedule.id)]['id'] = schedule.id
+
+
+            placing_last[str(schedule.id)] = {}
+            placing_last[str(schedule.id)]['divisions'] = {}
+            placing_last[str(schedule.id)]['name'] = schedule.name
+            placing_last[str(schedule.id)]['id'] = schedule.id
+
+
             for division in division_list:
                 required_divisins.append(division.id)
-                # if division.id not in required_divisions:
-                schedule_data[str(schedule.id)]['divisions'][str(division.id)] = {}
-                schedule_data[str(schedule.id)]['divisions'][str(division.id)]['came_workers'] = 0
-                schedule_data[str(schedule.id)]['divisions'][str(division.id)]['division_workers'] = 0
-                schedule_data[str(schedule.id)]['divisions'][str(division.id)]['name'] = division.name
-                schedule_data[str(schedule.id)]['divisions'][str(division.id)]['id'] = division.id
-                schedule_data[str(schedule.id)]['divisions'][str(division.id)]['limit'] = division.limit
-            #     else:
-            #         placing_last[str(division.id)] = {}
-            #         placing_last[str(division.id)]['came_workers'] = 0
-            #         placing_last[str(division.id)]['division_workers'] = 0
-            #         placing_last[str(division.id)]['name'] = division.name
-            #         placing_last[str(division.id)]['id'] = division.id
-            #         placing_last[str(division.id)]['limit'] = division.limit
-            # schedule_data[str(schedule.id)] = OrderedDict(schedule_data[str(schedule.id)])
-            # schedule_data[str(schedule.id)].update(placing_last)
-            # for required_division in required_divisions:
-            #     schedule_data[str(schedule.id)][str(required_division)] = schedule_data[str(schedule.id)].pop(str(required_division))
-            placing_last = {}
+                if division.id not in required_divisions:
+                    schedule_data[str(schedule.id)]['divisions'][str(division.id)] = {}
+                    schedule_data[str(schedule.id)]['divisions'][str(division.id)]['came_workers'] = 0
+                    schedule_data[str(schedule.id)]['divisions'][str(division.id)]['division_workers'] = 0
+                    schedule_data[str(schedule.id)]['divisions'][str(division.id)]['name'] = division.name
+                    schedule_data[str(schedule.id)]['divisions'][str(division.id)]['id'] = division.id
+                    schedule_data[str(schedule.id)]['divisions'][str(division.id)]['limit'] = division.limit
+
+                else:
+                    placing_last[str(schedule.id)]['divisions'][str(division.id)] = {}
+                    placing_last[str(schedule.id)]['divisions'][str(division.id)]['came_workers'] = 0
+                    placing_last[str(schedule.id)]['divisions'][str(division.id)]['division_workers'] = 0
+                    placing_last[str(schedule.id)]['divisions'][str(division.id)]['name'] = division.name
+                    placing_last[str(schedule.id)]['divisions'][str(division.id)]['id'] = division.id
+                    placing_last[str(schedule.id)]['divisions'][str(division.id)]['limit'] = division.limit
+
+                # for required_division in required_divisions:
+                #     schedule_data[str(schedule.id)][str(required_division)] = schedule_data[str(schedule.id)].pop(str(required_division))
+                # placing_last = {}
+
     cursor = 1
 
-    while True:
-        timesheets = get_verifix_timesheets(fromdate=from_date.strftime("%d.%m.%Y"),
-                                            todate=from_date.strftime("%d.%m.%Y"), cursor=cursor)
+    while (timesheets := get_verifix_timesheets(fromdate=from_date.strftime("%d.%m.%Y"),
+                                                todate=from_date.strftime("%d.%m.%Y"), cursor=cursor)) != False:
+        # timesheets = get_verifix_timesheets(fromdate=from_date.strftime("%d.%m.%Y"),
+        #                                     todate=from_date.strftime("%d.%m.%Y"), cursor=cursor)
+        if len(timesheets['data']) > 0:
+            cursor = timesheets['meta']['next_cursor']
+        else:
+            cursor = 0
 
         for i in timesheets['data']:
             try:
@@ -199,14 +214,16 @@ async def get_divisions(
                                 schedule_data[str(staff_data.schedule_id)]['divisions'][str(staff_data.division_id)]['division_workers'] += 1
             except:
                 pass
-        if len(timesheets['data']) > 0:
-            cursor = timesheets['meta']['next_cursor']
-        else:
-            break
+
 
 
     for key,value in schedule_data.items():
         schedule_data[str(key)]['divisions'] = list(value['divisions'].values())
+
+    for key,value in placing_last.items():
+        schedule_data[str(key)]['divisions'] = schedule_data[str(key)]['divisions'] + list(value['divisions'].values())
+
+
 
     for key,value in schedule_data.items():
         ready_data.append(value)
