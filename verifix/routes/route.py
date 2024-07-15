@@ -15,7 +15,8 @@ from services import (
     get_verifix_workers,
     get_verifix_staff,
     get_verifix_schedules,
-    sort_list_with_keys_at_end
+    sort_list_with_keys_at_end,
+excell_generate_v2
 
 )
 from verifix.query import crud
@@ -232,6 +233,118 @@ async def get_divisions(
 
 
     return {"timesheets":ready_data, 'expected_workers': expected_workers, 'came_workers': came_workers}
+
+
+
+
+@verifix_router.get("/v2/divisions/excell", summary="Get divisions",tags=["Division"])
+async def get_divisions_excell_v2(
+    from_date:date,
+    db: Session = Depends(get_db),
+    current_user: user_sch.User = Depends(get_current_user)
+):
+
+    expected_workers = 0
+    came_workers = 0
+    required_divisions = [23,102,26,44,104,103]
+    ready_data = []
+    required_schedules = [505,21,44,45,41,54]
+    schedule_list = crud.get_schedules(db=db)
+    placing_last = {}
+    schedule_data = {}
+    required_divisins = []
+    division_list = crud.get_divisions(db=db)
+
+
+
+    for schedule in schedule_list:
+
+        if schedule.id in required_schedules:
+
+            schedule_data[str(schedule.id)] = {}
+            schedule_data[str(schedule.id)]['divisions'] = {}
+            schedule_data[str(schedule.id)]['name'] = schedule.name
+            schedule_data[str(schedule.id)]['id'] = schedule.id
+
+
+            placing_last[str(schedule.id)] = {}
+            placing_last[str(schedule.id)]['divisions'] = {}
+            placing_last[str(schedule.id)]['name'] = schedule.name
+            placing_last[str(schedule.id)]['id'] = schedule.id
+
+
+            for division in division_list:
+                required_divisins.append(division.id)
+                if division.id not in required_divisions:
+                    schedule_data[str(schedule.id)]['divisions'][str(division.id)] = {}
+                    schedule_data[str(schedule.id)]['divisions'][str(division.id)]['came_workers'] = 0
+                    schedule_data[str(schedule.id)]['divisions'][str(division.id)]['division_workers'] = 0
+                    schedule_data[str(schedule.id)]['divisions'][str(division.id)]['name'] = division.name
+                    schedule_data[str(schedule.id)]['divisions'][str(division.id)]['id'] = division.id
+                    schedule_data[str(schedule.id)]['divisions'][str(division.id)]['limit'] = division.limit
+
+                else:
+                    placing_last[str(schedule.id)]['divisions'][str(division.id)] = {}
+                    placing_last[str(schedule.id)]['divisions'][str(division.id)]['came_workers'] = 0
+                    placing_last[str(schedule.id)]['divisions'][str(division.id)]['division_workers'] = 0
+                    placing_last[str(schedule.id)]['divisions'][str(division.id)]['name'] = division.name
+                    placing_last[str(schedule.id)]['divisions'][str(division.id)]['id'] = division.id
+                    placing_last[str(schedule.id)]['divisions'][str(division.id)]['limit'] = division.limit
+
+                # for required_division in required_divisions:
+                #     schedule_data[str(schedule.id)][str(required_division)] = schedule_data[str(schedule.id)].pop(str(required_division))
+                # placing_last = {}
+
+    cursor = 1
+
+    while (timesheets := get_verifix_timesheets(fromdate=from_date.strftime("%d.%m.%Y"),
+                                                todate=from_date.strftime("%d.%m.%Y"), cursor=cursor)) != False:
+        # timesheets = get_verifix_timesheets(fromdate=from_date.strftime("%d.%m.%Y"),
+        #                                     todate=from_date.strftime("%d.%m.%Y"), cursor=cursor)
+        if len(timesheets['data']) > 0:
+            cursor = timesheets['meta']['next_cursor']
+        else:
+            cursor = 0
+
+        for i in timesheets['data']:
+            try:
+                input_time_value = i['days'][0]['input_time']
+                expected_workers += 1
+                if input_time_value:
+                    came_workers += 1
+                    staff_data = crud.get_staff(db=db, staff_id=i['staff_id'])
+
+                    if staff_data:
+                        if staff_data.division_id in required_divisins:
+                            if staff_data.schedule_id in required_schedules:
+                                schedule_data[str(staff_data.schedule_id)]['divisions'][str(staff_data.division_id)]['came_workers'] += 1
+                                schedule_data[str(staff_data.schedule_id)]['divisions'][str(staff_data.division_id)]['division_workers'] += 1
+                else:
+                    staff_data = crud.get_staff(db=db, staff_id=i['staff_id'])
+                    if staff_data:
+                        if staff_data.division_id in required_divisins:
+                            if staff_data.schedule_id in required_schedules:
+                                schedule_data[str(staff_data.schedule_id)]['divisions'][str(staff_data.division_id)]['division_workers'] += 1
+            except:
+                pass
+
+
+
+    for key,value in schedule_data.items():
+        schedule_data[str(key)]['divisions'] = list(value['divisions'].values())
+
+    for key,value in placing_last.items():
+        schedule_data[str(key)]['divisions'] = schedule_data[str(key)]['divisions'] + list(value['divisions'].values())
+
+
+
+    for key,value in schedule_data.items():
+        ready_data.append(value)
+
+    excell_generate_v2(ready_data)
+
+
+    return {'file':'files/outputs.xlsx'}
 
 
 

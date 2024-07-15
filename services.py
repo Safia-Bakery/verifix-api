@@ -193,7 +193,7 @@ def excell_generate(data,divisions_dict):
     for i in data:
         data_frame['№'].append(i.id)
         data_frame['Отдел'].append(i.name)
-        if i.name == None:  
+        if i.name == None:
             data_frame['Норма Выхода'].append(' ')
         else:
             data_frame['Норма Выхода'].append(i.limit)
@@ -231,4 +231,29 @@ def sort_list_with_keys_at_end(data, keys_list):
 
     return final_sorted_list
 
+
+
+def excell_generate_v2(data):
+    ready_data = {}
+    for schedule in data:
+        data_frame = {'№':[],'Отдел':[],"Норма Выхода":[],"Штатка":[],'Фактический приход':[]}
+        for division in schedule['divisions']:
+            data_frame['№'].append(division['id'])
+            data_frame['Отдел'].append(division['name'])
+            if division['limit'] == None:
+                data_frame['Норма Выхода'].append(' ')
+            else:
+                data_frame['Норма Выхода'].append(division['limit'])
+            data_frame['Штатка'].append(division['division_workers'])
+            data_frame['Фактический приход'].append(division['came_workers'])
+
+        ready_data[schedule['name']] = data_frame
+    with pd.ExcelWriter('files/outputs.xlsx', engine='xlsxwriter') as writer:
+
+        for key,value in ready_data.items():
+            pd.DataFrame(value).to_excel(writer,sheet_name=str(key[:30]))
+
+
+
+    return 'output.xlsx'
 
