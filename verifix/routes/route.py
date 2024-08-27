@@ -241,6 +241,7 @@ async def get_divisions(
                     if staff_data:
                         if staff_data.division_id in required_divisins:
                             if staff_data.schedule_id in required_schedules:
+                                schedule_data[str(0)]['divisions'][str(staff_data.division_id)]['division_workers'] += 1
                                 schedule_data[str(staff_data.schedule_id)]['divisions'][str(staff_data.division_id)]['division_workers'] += 1
             except:
                 pass
