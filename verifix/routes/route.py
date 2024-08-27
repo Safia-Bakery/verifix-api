@@ -144,6 +144,33 @@ async def get_divisions(
     division_list = crud.get_divisions(db=db)
 
 
+    schedule_data['0']  = {}
+    schedule_data['0']['divisions'] = {}
+    schedule_data['0']['name'] = 'Общий'
+    schedule_data['0']['id'] = 0
+
+    placing_last['0'] = {}
+    placing_last['0']['divisions'] = {}
+    placing_last['0']['name'] = 'Общий'
+    placing_last['0']['id'] = 0
+
+    for division in division_list:
+        required_divisins.append(division.id)
+        if division.id not in required_divisions:
+            schedule_data['0']['divisions'][str(division.id)] = {}
+            schedule_data['0']['divisions'][str(division.id)]['came_workers'] = 0
+            schedule_data['0']['divisions'][str(division.id)]['division_workers'] = 0
+            schedule_data['0']['divisions'][str(division.id)]['name'] = division.name
+            schedule_data['0']['divisions'][str(division.id)]['id'] = division.id
+            schedule_data['0']['divisions'][str(division.id)]['limit'] = division.limit
+
+        else:
+            placing_last['0']['divisions'][str(division.id)] = {}
+            placing_last['0']['divisions'][str(division.id)]['came_workers'] = 0
+            placing_last['0']['divisions'][str(division.id)]['division_workers'] = 0
+            placing_last['0']['divisions'][str(division.id)]['name'] = division.name
+            placing_last['0']['divisions'][str(division.id)]['id'] = division.id
+            placing_last['0']['divisions'][str(division.id)]['limit'] = division.limit
 
     for schedule in schedule_list:
 
@@ -205,6 +232,8 @@ async def get_divisions(
                     if staff_data:
                         if staff_data.division_id in required_divisins:
                             if staff_data.schedule_id in required_schedules:
+                                schedule_data[str(0)]['divisions'][str(staff_data.division_id)]['came_workers'] += 1
+                                schedule_data[str(0)]['divisions'][str(staff_data.division_id)]['division_workers'] += 1
                                 schedule_data[str(staff_data.schedule_id)]['divisions'][str(staff_data.division_id)]['came_workers'] += 1
                                 schedule_data[str(staff_data.schedule_id)]['divisions'][str(staff_data.division_id)]['division_workers'] += 1
                 else:
