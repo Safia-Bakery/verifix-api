@@ -9,6 +9,7 @@ from database import engine
 from users.routes.user_routes import user_router
 #from routes import user_route,product_route
 from verifix.routes.route import verifix_router
+from verifix.routes.mindbox import mindbox_router
 
 app = FastAPI()
 app.title = "Safia FastApi App"
@@ -16,7 +17,7 @@ app.version = "0.0.1"
 
 app.include_router(user_router, tags=["User"])
 app.include_router(verifix_router, tags=["Verifix"])
-
+app.include_router(mindbox_router, tags=['MindBox'])
 #app.include_router(user_router)
 Base.metadata.create_all(bind=engine)
 app.mount("/files", StaticFiles(directory="files"), name="files")
