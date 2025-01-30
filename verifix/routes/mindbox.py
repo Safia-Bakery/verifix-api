@@ -37,13 +37,16 @@ async def update_division(
         request: Request,
         db: Session = Depends(get_db),
 ):
-    data: dict[str, Any] = await request.json()  # Parse JSON data
+    try:
+        data = await request.json()  # Parse JSON data
 
-    if data:  # Check if data is not empty
-        print(data)  # Print as a string
-        return True
+        if not data:  # If data is empty
+            raise HTTPException(status_code=400, detail="Empty JSON body received")
 
-    return False  # Return False if data is empty
+        print(str(data))  # Print as string
+        return {"success": True, "message": "Data received", "data": data}
 
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=f"Invalid JSON: {str(e)}")
 
 
