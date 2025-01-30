@@ -16,7 +16,7 @@ from services import (
     get_verifix_staff,
     get_verifix_schedules,
     sort_list_with_keys_at_end,
-excell_generate_v2
+    excell_generate_v2, get_basic_auth
 
 )
 from verifix.query import crud
@@ -36,6 +36,7 @@ mindbox_router = APIRouter()
 async def update_division(
         request: Request,
         db: Session = Depends(get_db),
+        username: str = Depends(get_basic_auth),
 ):
     try:
         data = await request.json()  # Parse JSON data

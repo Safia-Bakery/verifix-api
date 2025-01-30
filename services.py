@@ -16,7 +16,7 @@ from fastapi import (
 import smtplib
 from database import engine, SessionLocal
 from pydantic import ValidationError
-from fastapi.security import OAuth2PasswordBearer
+from fastapi.security import OAuth2PasswordBearer, HTTPBasic, HTTPBasicCredentials
 import xml.etree.ElementTree as ET
 import os
 from users.schemas import user_sch
@@ -256,4 +256,18 @@ def excell_generate_v2(data):
 
 
     return 'output.xlsx'
+
+
+
+security_basic = HTTPBasic()
+
+
+def get_basic_auth(credentials: HTTPBasicCredentials = Depends(security_basic)):
+    valid_username = "mindbox"
+    valid_password = "p367w84790zf"  # Replace with a secure method, such as database lookup
+
+    if credentials.username != valid_username or credentials.password != valid_password:
+        raise HTTPException(status_code=401, detail="Invalid credentials")
+
+    return credentials.username
 
