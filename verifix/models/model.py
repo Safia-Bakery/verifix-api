@@ -79,4 +79,14 @@ class Timesheets(Base):
     status=Column(Integer,default=1)
 
 
+class Exports(Base):
+    __tablename__ = 'exports'
+    id = Column(BIGINT, primary_key=True, index=True)
+    export_id = Column(String)
+    is_sended = Column(Boolean,default=False)
+    created_at = Column(DateTime(timezone=True), default=func.now())
+    updated_at = Column(DateTime(timezone=True), onupdate=func.now())
+
+
+
 

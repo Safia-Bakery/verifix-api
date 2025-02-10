@@ -1,53 +1,93 @@
-from fastapi import APIRouter
-from sqlalchemy.orm import Session
-from fastapi import Depends, HTTPException, status,UploadFile,File,Request
-from typing import Optional, Annotated, Any
-from users.schemas import user_sch
-from collections import OrderedDict
-import pandas as pd
-from datetime import datetime,date
-from services import (
-    get_db,
-    get_current_user,
-    get_virifix_divisions,
-    get_verifix_timesheets,
-    excell_generate,
-    get_verifix_workers,
-    get_verifix_staff,
-    get_verifix_schedules,
-    sort_list_with_keys_at_end,
-    excell_generate_v2, get_basic_auth
+import os
 
-)
-from verifix.query import crud
-from verifix.schemas import schema
 import pytz
 from apscheduler.schedulers.background import BackgroundScheduler
 from apscheduler.triggers.cron import CronTrigger
+from fastapi import APIRouter
+
+from verifix.query.mindbox import createExport, getIsSended
+from verifix.utils.utils import getFileMinbox, extract_json_from_gz
 
 #set time zones
 timezone_tash = pytz.timezone("Asia/Tashkent")
+from database import SessionLocal
+
+
 
 # base Router
 mindbox_router = APIRouter()
 
 
-@mindbox_router.post("/orders", summary="Update division", tags=["Division"])
-async def update_division(
-        request: Request,
-        db: Session = Depends(get_db),
-        username: str = Depends(get_basic_auth),
-):
-    try:
-        data = await request.json()  # Parse JSON data
+def requestFileReportMindbox():
+    response = getFileMinbox()
 
-        if not data:  # If data is empty
-            raise HTTPException(status_code=400, detail="Empty JSON body received")
+    if response:
+        with SessionLocal() as db:
+            createExport(db=db,export_id=response['exportId'])
 
-        print(str(data))  # Print as string
-        return {"success": True, "message": "Data received", "data": data}
+    return True
 
-    except Exception as e:
-        raise HTTPException(status_code=400, detail=f"Invalid JSON: {str(e)}")
+
+def prepareReport():
+    with SessionLocal() as db:
+        query_ = getIsSended(db=db)
+        print(query_)
+        file_directory = '/Users/gayratbekakhmedov/projects/backend/verifx/files'
+        output_directory ='/Users/gayratbekakhmedov/projects/backend/verifx/files'
+        file_id = '110174'
+        file_path = extract_json_from_gz(directory=file_directory,output_directory=output_directory,target_id=file_id)
+
+        if file_path and os.path.exists(file_path):
+
+            # Perform operations on the extracted file...
+
+            # Delete the file after processing
+            try:
+                os.remove(file_path)
+                print(f"Deleted file: {file_path}")
+            except Exception as e:
+                print(f"Error deleting file {file_path}: {e}")
+            # try:
+            #     os.remove(f"{file_path}.gz")
+            #
+            # except Exception as e:
+            #     print(f"Error deleting gz file {e}")
+
+
+    return True
+
+
+
+
+
+
+@mindbox_router.on_event("startup")
+def startup_event():
+    scheduler = BackgroundScheduler()
+    trigger = CronTrigger(hour=17, minute=5, second=00,
+                          timezone=timezone_tash)  # Set the desired time for the function to run (here, 12:00 PM)
+    scheduler.add_job(prepareReport, trigger=trigger)
+    scheduler.start()
+
+
+
+
+@mindbox_router.on_event("startup")
+def startup_event_request_report():
+    scheduler = BackgroundScheduler()
+    trigger = CronTrigger(hour=17, minute=4, second=00,
+                          timezone=timezone_tash)  # Set the desired time for the function to run (here, 12:00 PM)
+    scheduler.add_job(requestFileReportMindbox, trigger=trigger)
+    scheduler.start()
+
+
+
+
+
+
+
+
+
+
 
 
