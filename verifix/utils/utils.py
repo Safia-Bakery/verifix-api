@@ -22,10 +22,10 @@ def getFileMinbox():
 
 
     # Get environment variables safely
-    server_user = os.getenv('SERVER_USER', 'default_user')
-    server_password = os.getenv('SERVER_PASSWORD', 'default_password')
-    server_host = os.getenv('SERVER_HOST', 'default_host')
-    print(server_host,server_password,server_user)
+    server_user = os.getenv('SERVER_USER',)
+    server_password = os.getenv('SERVER_PASSWORD')
+    server_host = os.getenv('SERVER_HOST')
+
 
     # Define request body
     body_ = {
