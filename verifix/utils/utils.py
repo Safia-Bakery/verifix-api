@@ -44,6 +44,7 @@ def getFileMinbox():
             }
         }
     }
+    print(body_)
 
     # API URL and Headers
     url_ = "https://api.mindbox.ru/v3/operations/sync?endpointId=safiabakery.fraud&operation=SafiaExportOrders"
