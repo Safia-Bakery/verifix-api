@@ -10,6 +10,8 @@ import shutil
 timezonetash = pytz.timezone("Asia/Tashkent")
 
 SQLALCHEMY_DATABASE_URL = os.getenv('DATABASE_URL')
+bot_token = os.getenv("TELEGRAMBOT")
+chat_id = os.getenv('CHAT')
 
 def getFileMinbox():
     today = datetime.now(tz=timezonetash)
@@ -92,8 +94,15 @@ def extract_json_from_gz(directory, target_id, output_directory):
             with gzip.open(gz_path, 'rb') as f_in, open(output_path, 'wb') as f_out:
                 shutil.copyfileobj(f_in, f_out)
 
-            print(f"✅ Extracted: {json_filename} → {output_directory}")
-            return output_path
+            return {'gz_file':gz_path,'file_path':output_path}
 
     return None
 
+
+def send_file_telegram( file_path, caption="Here is your file"):
+    url = f"https://api.telegram.org/bot{bot_token}/sendDocument"
+    with open(file_path, 'rb') as file:
+        files = {'document': file}
+        data = {'chat_id': chat_id, 'caption': caption}
+        response = requests.post(url, data=data, files=files)
+    return response.json()
