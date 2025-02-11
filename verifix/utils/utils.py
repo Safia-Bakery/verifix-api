@@ -32,7 +32,7 @@ def getFileMinbox():
         "tillDateTimeUtc": to_date,
         "exportOutput": {
             "type": "FTP",
-            "directory": "/var/www/verifix-api/files",
+            "directory": "/mindbox",
             "credentials": {
                 "userName": server_user,
                 "password": server_password
