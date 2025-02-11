@@ -9,7 +9,7 @@ from fastapi import APIRouter
 from datetime import datetime,timedelta
 
 
-from verifix.query.mindbox import createExport, getIsSended
+from verifix.query.mindbox import createExport, getIsSended,updateIsSended
 from verifix.utils.utils import getFileMinbox, extract_json_from_gz, send_file_telegram
 
 #set time zones
@@ -147,6 +147,7 @@ def prepareReport():
                 os.remove(f"{file_return['gz_file']}")
             except Exception as e:
                 print(f"Error deleting gz file {e}")
+            updateIsSended(db=db,export_id=file_id)
     return True
 
 
@@ -164,7 +165,7 @@ def startup_event():
 @mindbox_router.on_event("startup")
 def startup_event_request_report():
     scheduler = BackgroundScheduler()
-    trigger = CronTrigger(hour=15, minute=25, second=00,
+    trigger = CronTrigger(hour=15, minute=41, second=00,
                           timezone=timezone_tash)  # Set the desired time for the function to run (here, 12:00 PM)
     scheduler.add_job(requestFileReportMindbox, trigger=trigger)
     scheduler.start()
