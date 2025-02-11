@@ -25,6 +25,7 @@ def getFileMinbox():
     server_user = os.getenv('SERVER_USER', 'default_user')
     server_password = os.getenv('SERVER_PASSWORD', 'default_password')
     server_host = os.getenv('SERVER_HOST', 'default_host')
+    print(server_host,server_password,server_user)
 
     # Define request body
     body_ = {
