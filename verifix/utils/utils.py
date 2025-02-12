@@ -33,7 +33,7 @@ def getFileMinbox():
         "tillDateTimeUtc": to_date,
         "exportOutput": {
             "type": "FTP",
-            "directory": "/mindbox",
+            "directory": "upload",
             "credentials": {
                 "userName": server_user,
                 "password": server_password
