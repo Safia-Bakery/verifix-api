@@ -120,17 +120,17 @@ def prepareReport():
             with pd.ExcelWriter(output_excel, engine="xlsxwriter") as writer:
                 if fraud_orders["frequent_usage"]:
                     df1 = pd.DataFrame(fraud_orders["frequent_usage"], columns=["Сколько покупок","Номер телефона","Филиал"])
-                    df1.to_excel(writer, sheet_name="Frequent Usage", index=False)
+                    df1.to_excel(writer, sheet_name="Частота покупок", index=False)
 
                 if fraud_orders["high_spending"]:
                     df2 = pd.DataFrame(fraud_orders["high_spending"],
                                        columns=["Номер заказа Mindbox", "Списание баллов","Оплачено не бонусами","Номер телефона","Филиал",'Время покупки'])
-                    df2.to_excel(writer, sheet_name="High Spending", index=False)
+                    df2.to_excel(writer, sheet_name="Подозрительные списания", index=False)
 
                 if fraud_orders["high_earning"]:
                     df3 = pd.DataFrame(fraud_orders["high_earning"],
                                        columns=["Номер заказа Mindbox", "Сумма начисления","Итоговая сумма","Номер телефона","Филиал",'Время покупки'])
-                    df3.to_excel(writer, sheet_name="High Earnings", index=False)
+                    df3.to_excel(writer, sheet_name="Подозрительные начисления", index=False)
             current_date = datetime.now()-timedelta(days=1)
             current_date = current_date.strftime("%d.%m.%Y")
             send_file_telegram(file_path=output_excel,  caption=f"Fraud Orders {current_date}")
@@ -165,7 +165,7 @@ def startup_event():
 @mindbox_router.on_event("startup")
 def startup_event_request_report():
     scheduler = BackgroundScheduler()
-    trigger = CronTrigger(hour=10, minute=42, second=00,
+    trigger = CronTrigger(hour=10, minute=51, second=00,
                           timezone=timezone_tash)  # Set the desired time for the function to run (here, 12:00 PM)
     scheduler.add_job(requestFileReportMindbox, trigger=trigger)
     scheduler.start()
