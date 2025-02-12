@@ -50,7 +50,7 @@ def parse_datetime(date_str):
 def prepareReport():
     with SessionLocal() as db:
         query_ = getIsSended(db=db)
-        file_directory = '/home/user/mindbox'
+        file_directory = '/srv/ftp/test/upload'
         output_directory = '/var/www/verifix-api/files'
         file_id = query_.export_id
         file_return = extract_json_from_gz(directory=file_directory, output_directory=output_directory, target_id=file_id)
