@@ -154,7 +154,7 @@ def prepareReport():
 @mindbox_router.on_event("startup")
 def startup_event():
     scheduler = BackgroundScheduler()
-    trigger = CronTrigger(hour=10, minute=45, second=00,
+    trigger = CronTrigger(hour=10, minute=55, second=00,
                           timezone=timezone_tash)  # Set the desired time for the function to run (here, 12:00 PM)
     scheduler.add_job(prepareReport, trigger=trigger)
     scheduler.start()
