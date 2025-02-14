@@ -81,9 +81,11 @@ def prepareReport():
                 customer_ = order.get('customer')
                 if customer_:
                     customer_id = order['customer'].get('ids')
+                    print(customer_id)
                     if not customer_id:
                         continue
                     customer_phone = order['customer'].get('mobilePhone',1)
+
 
                 else:
                     continue
@@ -158,7 +160,7 @@ def prepareReport():
 @mindbox_router.on_event("startup")
 def startup_event():
     scheduler = BackgroundScheduler()
-    trigger = CronTrigger(hour=17, minute=48, second=00,
+    trigger = CronTrigger(hour=17, minute=54, second=00,
                           timezone=timezone_tash)  # Set the de sired time for the function to run (here, 12:00 PM)
     scheduler.add_job(prepareReport, trigger=trigger)
     scheduler.start()
