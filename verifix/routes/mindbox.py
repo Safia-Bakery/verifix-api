@@ -144,6 +144,7 @@ def prepareReport():
                     df3.to_excel(writer, sheet_name="Подозрительные начисления", index=False)
             current_date = datetime.now()-timedelta(days=1)
             current_date = current_date.strftime("%d.%m.%Y")
+            current_date = '17.02.2025'
             send_file_telegram(file_path=output_excel,  caption=f"Fraud Orders {current_date}")
             # Delete file after processing
             try:
@@ -165,7 +166,7 @@ def prepareReport():
 @mindbox_router.on_event("startup")
 def startup_event():
     scheduler = BackgroundScheduler()
-    trigger = CronTrigger(hour=10, minute=58, second=00,
+    trigger = CronTrigger(hour=11, minute=1, second=00,
                           timezone=timezone_tash)  # Set the de sired time for the function to run (here, 12:00 PM)
     scheduler.add_job(prepareReport, trigger=trigger)
     scheduler.start()
