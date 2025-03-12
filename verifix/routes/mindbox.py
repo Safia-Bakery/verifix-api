@@ -74,6 +74,7 @@ def prepareReport():
                 order_date = str(order['firstAction']['dateTimeUtc'])
 
                 formatted_date = parse_datetime(order_date)
+                formatted_date = formatted_date + timedelta(hours=5)
                 formatted_date = formatted_date.strftime("%d.%m.%Y %H:%M:%S")
 
 
